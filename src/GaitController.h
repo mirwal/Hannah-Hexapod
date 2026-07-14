@@ -8,8 +8,17 @@
  * Er kennt keine Servo-IDs, keine Hardware und führt keine inverse Kinematik aus.
  */
 #include <cstdint>
+#include <Arduino.h>
+#include "Vector3D.h"
 #include "HexapodTypes.h"
 #include "HexapodGeometry.h"
+
+// test: Einzelbeinbewegung
+inline constexpr uint8_t TEST_LEG_INDEX = 1;
+inline constexpr float TEST_LIFT_HEIGHT_MM = 20.0f;
+inline constexpr float TEST_STEP_FORWARD_MM = 30.0f;
+inline constexpr uint32_t TEST_PHASE_TIME_MS = 1000;
+
 enum class SingleLegStepPhase : uint8_t
 {
     Home,
@@ -38,10 +47,11 @@ struct GaitRequest // Bewegungsanfrage an den GaitController
 class GaitController // Berechnet die Fuß-Zielpositionen für die Gangbewegung des Hexapods
 {
 public:
-    void setGaitRequest(const GaitRequest &request) { gaitRequest = request; } // Eingabe der Bewegungsrichtung und Geschwindigkeit
-    void update(float deltaTime);                                              // Berechnung der Zielpositionen für alle Beine basierend auf der Eingabe und phase
-
+    void setGaitRequest(const GaitRequest &request) { gaitRequest = request; }                       // Eingabe der Bewegungsrichtung und Geschwindigkeit
+    void update(float deltaTime);                                                                    // Berechnung der Zielpositionen für alle Beine basierend auf der Eingabe und phase
+    void updateSingleLegTest();                                                                      // Test: Einzelbeinbewegung für das Bein TEST_LEG_INDEX
     FootPositionBody getFootTargetBody(uint8_t legIndex) const { return footTargetsBody[legIndex]; } // Zielposition im Körper-Koordinatensystem abfragen
+    FootPositionBody localToBody(uint8_t legIndex, const LegPositionLocal &local) const;
 
 private:
     float phase = 0.0f;

@@ -2,120 +2,18 @@
 #include "Hexapod.h"
 #include "GaitController.h"
 
-// Testparameter für die Einzelbeinbewegung
-inline constexpr uint8_t TEST_LEG_INDEX = 0;
-
-inline constexpr float TEST_LIFT_HEIGHT_MM = 20.0f;
-inline constexpr float TEST_STEP_FORWARD_MM = 30.0f;
-inline constexpr uint32_t TEST_PHASE_TIME_MS = 1000;
-
 void Hexapod::updateTesting(const HexapodControl &control)
 {
-    static SingleLegStepPhase phase = SingleLegStepPhase::Home;
-    static uint32_t phaseStartTime = 0;
-    static float phaseProgress = 0.0f;
-    const uint32_t now = millis();
 
-    if (phaseStartTime == 0)
-    {
-        phaseStartTime = now;
-    }
+    gaitController.updateSingleLegTest();
 
-    if (phaseProgress >= 1.0f)
-    {
-        phaseStartTime = now;
-        phaseProgress = 0.0f;
-        switch (phase)
-        {
-        case SingleLegStepPhase::Home:
-            phase = SingleLegStepPhase::Lift;
-            break;
+    FootPositionBody footTargetBody =
+        gaitController.getFootTargetBody(TEST_LEG_INDEX);
 
-        case SingleLegStepPhase::Lift:
-            phase = SingleLegStepPhase::MoveForward;
-            break;
+    LegPositionLocal localTarget =
+        transformBodyToLegLocal(TEST_LEG_INDEX, footTargetBody);
 
-        case SingleLegStepPhase::MoveForward:
-            phase = SingleLegStepPhase::Lower;
-            break;
-
-        case SingleLegStepPhase::Lower:
-            phase = SingleLegStepPhase::ReturnHome;
-            break;
-
-        case SingleLegStepPhase::ReturnHome:
-            phase = SingleLegStepPhase::Done;
-            break;
-
-        case SingleLegStepPhase::Done:
-            phase = SingleLegStepPhase::Home;
-            break;
-        }
-    }
-
-    LegPositionLocal home = legs[TEST_LEG_INDEX].getHomePosition();
-    LegPositionLocal start = home;
-    LegPositionLocal end = home;
-    LegPositionLocal target = home;
-
-    switch (phase)
-    {
-    case SingleLegStepPhase::Home:
-    {
-        start = home;
-        end = home;
-        break;
-    }
-
-    case SingleLegStepPhase::Lift:
-    {
-        start = home;
-        end = home;
-        end.z += TEST_LIFT_HEIGHT_MM;
-        break;
-    }
-
-    case SingleLegStepPhase::MoveForward:
-    {
-        start = home;
-        start.z += TEST_LIFT_HEIGHT_MM;
-
-        end = start;
-        end.x += TEST_STEP_FORWARD_MM;
-        break;
-    }
-
-    case SingleLegStepPhase::Lower:
-    {
-        start = home;
-        start.z += TEST_LIFT_HEIGHT_MM;
-        start.x += TEST_STEP_FORWARD_MM;
-
-        end = home;
-        end.x += TEST_STEP_FORWARD_MM;
-        break;
-    }
-
-    case SingleLegStepPhase::ReturnHome:
-    {
-        start = home;
-        start.x += TEST_STEP_FORWARD_MM;
-
-        end = home;
-        break;
-    }
-
-    case SingleLegStepPhase::Done:
-    {
-        start = home;
-        end = home;
-        break;
-    }
-    }
-
-    target = interpolate(start, end, phaseProgress);
-
-    IKResult result = ikSolver.solve(target);
+    IKResult result = ikSolver.solve(localTarget);
 
     if (!result.reachable)
     {
@@ -125,22 +23,18 @@ void Hexapod::updateTesting(const HexapodControl &control)
 
     applyAnglesToLeg(TEST_LEG_INDEX, result.angles);
 
-    uint32_t elapsed = now - phaseStartTime;
-    phaseProgress = (float)elapsed / (float)TEST_PHASE_TIME_MS;
-
-    if (phaseProgress > 1.0f)
-    {
-        phaseProgress = 1.0f;
-    }
-
     if (control.debugMode == HexapodDebugMode::Maximal)
     {
-        Serial.printf("Phase=%u progress=%.2f | Target x=%.2f y=%.2f z=%.2f\n",
-                      static_cast<uint8_t>(phase),
-                      phaseProgress,
-                      target.x,
-                      target.y,
-                      target.z);
+        Serial.printf("Body Target \tx=%.2f \ty=%.2f \tz=%.2f\n",
+                      footTargetBody.x,
+                      footTargetBody.y,
+                      footTargetBody.z);
+
+        Serial.printf("Local Target \tx=%.2f \ty=%.2f \tz=%.2f\n",
+                      localTarget.x,
+                      localTarget.y,
+                      localTarget.z);
+        debugRoundtripTest();
     }
 }
 
@@ -195,6 +89,24 @@ void Hexapod::update(const HexapodControl &control)
         updateIdle();
 
         break;
+    }
+}
+
+void Hexapod::debugRoundtripTest()
+{
+    for (uint8_t i = 0; i < LEG_COUNT; i++)
+    {
+        FootPositionBody body =
+            gaitController.localToBody(i, FOOT_HOME_LOCAL);
+
+        LegPositionLocal local =
+            transformBodyToLegLocal(i, body);
+
+        Serial.printf("Leg %u Roundtrip local: x=%.2f y=%.2f z=%.2f\n",
+                      i + 1,
+                      local.x,
+                      local.y,
+                      local.z);
     }
 }
 

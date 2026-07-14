@@ -12,7 +12,7 @@ Vector3D IK::computeStepOffset(uint8_t i,
                                float Lmax)
 {
     // Home-Position + Mount
-    Vector3D base = mountPos[i] + footHomeOffsetBody[i];
+    Vector3D base = mountPos[i] + FOOT_HOME_LOCAL;
     // Serial.printf("Leg %d: base= (%.1f, %.1f, %.1f)\n",                  i, base.x, base.y, base.z);
 
     // Tripod-Gruppen

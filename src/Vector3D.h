@@ -62,3 +62,15 @@ inline Vector3D interpolate(const Vector3D &start, const Vector3D &end, float t)
         t = 1.0f;
     return start + (end - start) * t;
 }
+
+// Rotiert einen Vektor um die Z-Achse um den gegebenen Winkel (in Bogenmaß).
+inline Vector3D rotateAroundZ(const Vector3D &v, float angleRad)
+{
+    float c = cosf(angleRad);
+    float s = sinf(angleRad);
+
+    return {
+        v.x * c - v.y * s,
+        v.x * s + v.y * c,
+        v.z};
+}

@@ -38,17 +38,13 @@ inline constexpr float FEMUR_LEN = 64.2f;
 inline constexpr float TIBIA_LEN = 94.8f;
 
 // Abstand Fußspitze ↔ Coxa-Achse [mm]
-inline constexpr float AF_CA = 80.0f;
+inline constexpr float AF_CA = 50.0f;
 
-// Home-Positionen der Füße im Body-Koordinatensystem
-inline constexpr Vector3D footHomeOffsetBody[LEG_COUNT] = {
-    {40.0f, 69.28f, -30.0f},   //  60°
-    {-40.0f, 69.28f, -30.0f},  // 120°
-    {-80.0f, 0.0f, -30.0f},    // 180°
-    {-40.0f, -69.28f, -30.0f}, // 240°
-    {40.0f, -69.28f, -30.0f},  // 300°
-    {80.0f, 0.0f, -30.0f}      //   0°
-};
+// Lokale Home-Position der Fußspitze relativ zur Coxa-Achse [mm]
+// x: Abstand nach außen vom Körper
+// y: seitlicher Versatz innerhalb der Beinebene
+// z: Höhe, negativ nach unten
+inline constexpr Vector3D FOOT_HOME_LOCAL = {AF_CA, 0.0f, -80.0f};
 
 // Coxa-Montagepunkte im Körper-Koordinatensystem
 inline constexpr Vector3D mountPos[LEG_COUNT] = {
@@ -93,4 +89,12 @@ inline constexpr float mountPhi[LEG_COUNT] = {
 //     {-80.00f, 0.00f, -30.0f},   // Bein 4 (180°)
 //     {-40.00f, 69.28f, -30.0f}   // Bein 5 (120°)
 
+// };
+// inline constexpr Vector3D footHomeOffsetBody[LEG_COUNT] = {
+//     {40.0f, 69.28f, -30.0f},   //  60°
+//     {-40.0f, 69.28f, -30.0f},  // 120°
+//     {-80.0f, 0.0f, -30.0f},    // 180°
+//     {-40.0f, -69.28f, -30.0f}, // 240°
+//     {40.0f, -69.28f, -30.0f},  // 300°
+//     {80.0f, 0.0f, -30.0f}      //   0°
 // };

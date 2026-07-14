@@ -61,6 +61,7 @@ public:
     void setDebugMode(HexapodDebugMode mode) { debugMode = mode; }
     HexapodDebugMode getDebugMode() const { return debugMode; }
     String createServoIdReport() const;
+    void debugRoundtripTest();
 
 private:
     ServoBus &servoBus;
