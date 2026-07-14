@@ -1,0 +1,50 @@
+Guten Morgen, mirwal 🙂
+
+Es ist nicht völlig egal, wie groß der Chat wird. Ein langer Chat ist bequem,
+weil der Zusammenhang da ist — aber irgendwann wird er unübersichtlich 
+und alte Details können leichter „verrauschen“.
+
+Für dein HANNAH-Projekt würde ich es so machen:
+
+Diesen Chat weiter nutzen, solange wir an einem zusammenhängenden Thema arbeiten, zum Beispiel:
+
+IK verstehen
+Servo-Kalibrierung
+SystemStatus
+erster Schritt / GaitController
+
+Aber wenn ein klarer Abschnitt abgeschlossen ist, wäre ein neuer Chat sinnvoll, zum Beispiel:
+
+HANNAH – GaitController erster Schritt
+HANNAH – ServoBus stabilisieren
+HANNAH – IK Kalibrierung
+HANNAH – SystemStatus und Logging
+
+Der Vorteil kleinerer Chats:
+
+weniger Durcheinander
+schneller wiederzufinden
+gezieltere Antworten
+weniger alte Testideen im Hintergrund
+
+Der Nachteil:
+
+du musst mir am Anfang kurz sagen, wo wir stehen
+
+Am besten wäre: Wenn wir einen neuen Chat anfangen, gibst du mir oben kurz einen Startblock wie:
+
+Projekt: Hexapod HANNAH
+Stand:
+- Teensy 4.1
+- AX-12 Servos IDs 1–18
+- ServoBus funktioniert
+- IK für ein Bein getestet
+- Tibia invertiert: TIBIA_SERVO_DIR = -1, Offset 78°
+- SystemStatus mit Flags funktioniert
+- nächstes Ziel: ein Bein heben/schwenken/absetzen
+
+Dann bin ich sofort wieder drin.
+
+Für heute kannst du diesen Chat ruhig noch weiter nutzen. 
+Wenn wir nachher wirklich mit dem ersten Schritt / GaitController anfangen, 
+wäre ein neuer Chat mit genau diesem Titel aber schön sauber.

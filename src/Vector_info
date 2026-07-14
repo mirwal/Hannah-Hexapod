@@ -1,0 +1,97 @@
+Für HANNAH wären diese Vektoren typisch :
+
+    Vector3D bodyPosition;
+Position des Körpers im Raum.Zum Beispiel Höhe oder Verschiebung des Körpers.
+
+    Vector3D bodyVelocity;
+Bewegungsrichtung des Körpers, also vorwärts / rückwärts / seitwärts.
+
+    Vector3D legBasePosition;
+Montagepunkt eines Beins am Körper.Also wo das Bein am Hexapod befestigt ist.
+
+    Vector3D footHomePosition;
+Ruheposition des Fußes.Dorthin soll das Bein zurück, wenn HANNAH normal steht.
+
+    Vector3D footCurrentPosition;
+Aktuelle berechnete Fußposition.
+
+    Vector3D footTargetPosition;
+Zielposition des Fußes.
+
+    Vector3D footStepStart;
+    Vector3D footStepEnd;
+Start - und Endpunkt eines Schrittes.
+
+    Vector3D stepOffset;
+Versatz für den nächsten Schritt, zum Beispiel abhängig von dirX, dirY und Drehung.
+
+    Vector3D centerOfMass;
+Schwerpunkt des Roboters.Später wichtig für Stabilität.
+
+    Vector3D groundNormal;
+Richtung, in die der Boden zeigt.Später interessant, wenn HANNAH auf schiefem Untergrund steht.
+
+
+Für den Anfang würde ich klein starten Ich würde nicht sofort alles einbauen.Für deine nächsten Klassen reichen vermutlich erstmal :
+
+    Vector3D homePosition;
+    Vector3D currentPosition;
+    Vector3D targetPosition;
+
+
+    in der Leg - Klasse. Zum Beispiel :
+
+class Leg
+{
+public:
+    Leg(uint8_t coxaId, uint8_t femurId, uint8_t tibiaId);
+
+private:
+    uint8_t coxaId;
+    uint8_t femurId;
+    uint8_t tibiaId;
+
+    Vector3D homePosition;
+    Vector3D currentPosition;
+    Vector3D targetPosition;
+};
+
+Namens - Tipp
+
+    Ich würde nicht unbedingt BodyVektor oder LegPositionVektor schreiben.
+    Da der Typ schon Vector3D heißt, sollte der Variablenname die 
+    
+Bedeutung sagen :
+
+    Vector3D bodyPosition;          // gut
+    Vector3D footTargetPosition;    // gut
+    Vector3D legBasePosition;       // gut
+
+Statt :
+
+    Vector3D bodyVector;            // zu allgemein
+    Vector3D legVector;             // sagt nicht genau, was gemeint ist
+
+
+Der beste Start für HANNAH wäre also :
+
+    Leg
+→ homePosition
+→ currentPosition
+→ targetPosition
+
+    GaitController
+→ stepStart
+→ stepEnd
+→ stepOffset
+
+    Hexapod
+→ bodyPosition
+→ bodyRotation / bodyPose 
+
+später separat
+
+
+        Wichtig : Körperrotation wie pitch,
+    roll, yaw würde ich nicht als Vector3D für Position verstehen,
+    sondern später eher als eigene Struktur, zum Beispiel BodyPose.
