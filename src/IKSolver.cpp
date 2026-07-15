@@ -13,7 +13,7 @@ IKResult IKSolver::solve(const LegPositionLocal &targetPosition) const
     result.debug.horizontalDistance = horizontalDistance;
 
     // 2. Coxa-Länge abziehen: ab hier beginnt das Femur/Tibia-Dreieck
-    float legX = horizontalDistance - COXA_LEN;
+    float legX = horizontalDistance - COXA_LEN_MM;
     float legZ = targetPosition.z;
     result.debug.legX = legX;
     result.debug.legZ = legZ;
@@ -23,14 +23,14 @@ IKResult IKSolver::solve(const LegPositionLocal &targetPosition) const
     result.debug.distance = distance;
 
     // 4. Erreichbarkeit prüfen
-    if (distance > FEMUR_LEN + TIBIA_LEN)
+    if (distance > FEMUR_LEN_MM + TIBIA_LEN_MM)
     {
         result.reachable = false;
         Serial.println(distance);
         return result;
     }
 
-    if (distance < fabsf(FEMUR_LEN - TIBIA_LEN))
+    if (distance < fabsf(FEMUR_LEN_MM - TIBIA_LEN_MM))
     {
         result.reachable = false;
         Serial.println(distance);
@@ -42,8 +42,8 @@ IKResult IKSolver::solve(const LegPositionLocal &targetPosition) const
 
     // 6. Winkelanteil am Femur über Kosinussatz
     float femurCos =
-        (FEMUR_LEN * FEMUR_LEN + distance * distance - TIBIA_LEN * TIBIA_LEN) /
-        (2.0f * FEMUR_LEN * distance);
+        (FEMUR_LEN_MM * FEMUR_LEN_MM + distance * distance - TIBIA_LEN_MM * TIBIA_LEN_MM) /
+        (2.0f * FEMUR_LEN_MM * distance);
 
     femurCos = constrain(femurCos, -1.0f, 1.0f);
 
@@ -52,8 +52,8 @@ IKResult IKSolver::solve(const LegPositionLocal &targetPosition) const
 
     // 7. Tibia-Winkel über Kosinussatz
     float tibiaCos =
-        (FEMUR_LEN * FEMUR_LEN + TIBIA_LEN * TIBIA_LEN - distance * distance) /
-        (2.0f * FEMUR_LEN * TIBIA_LEN);
+        (FEMUR_LEN_MM * FEMUR_LEN_MM + TIBIA_LEN_MM * TIBIA_LEN_MM - distance * distance) /
+        (2.0f * FEMUR_LEN_MM * TIBIA_LEN_MM);
 
     tibiaCos = constrain(tibiaCos, -1.0f, 1.0f);
 

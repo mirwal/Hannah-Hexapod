@@ -74,7 +74,8 @@ private:
     LegPositionLocal homePosition;    // Wo steht der Fuß lokal neutral?
     LegPositionLocal targetPosition;  // Wo soll der Fuß hin relativ zum Coxa-Montagepunkt?
     LegPositionLocal currentPosition; // wo steht der Fuß aktuell relativ zum Coxa-Montagepunkt?
-    MountPositionBody mountPosition;  // Wo sitzt dieses Bein am Body?
+
+    MountPositionBody mountPosition; // Wo sitzt dieses Bein am Body?
 
     LegState state = LegState::Idle;
 };

@@ -34,13 +34,12 @@ enum class GaitType : uint8_t // Typ des Gangs
     Ripple,
     Wave
 };
-
-struct GaitRequest // Bewegungsanfrage an den GaitController
+struct GaitRequest
 {
-    float dirX = 0.0f;
-    float dirY = 0.0f;
-    float rot = 0.0f;
+    MoveVectorBody moveVecBody = {0.0f, 0.0f, 0.0f}; // x / y Bewegungsrichtung im Body - System float yaw = 0.0f;
+    float yaw = 0.0f;                                // Drehwunsch um die Z-Achse
     float speed = 1.0f;
+    float pitch = 0.0f; // Neigungswunsch um die X-Achse
     GaitType type = GaitType::Tripod;
 };
 
@@ -56,5 +55,6 @@ public:
 private:
     float phase = 0.0f;
     GaitRequest gaitRequest;
+    MoveVectorBody moveVecBody;
     FootPositionBody footTargetsBody[LEG_COUNT];
 };

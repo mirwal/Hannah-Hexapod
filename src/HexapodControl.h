@@ -7,6 +7,7 @@
  * aus den rohen Funkdaten, der Hexapod liest sie zur Bewegungssteuerung.
  */
 #include <cstdint>
+#include "HexapodTypes.h"
 
 enum class HexapodFunction : uint8_t
 {
@@ -35,9 +36,8 @@ struct HexapodControl
 {
     bool online = false;
 
-    float dirX = 0.0f;
-    float dirY = 0.0f;
-    float rot = 0.0f;
+    MoveVectorBody moveDirBody = {0.0f, 0.0f, 0.0f}; // x/y Bewegungsrichtung im Body-System
+    float yaw = 0.0f;                                // Drehwunsch um die Z-Achse
     float pitch = 0.0f;
     bool trainer = false;
     bool resetStatusRequested = false;

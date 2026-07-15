@@ -34,6 +34,7 @@
 #include "ServoBus.h"
 #include "GaitController.h"
 #include "SystemStatus.h"
+#include "ServoConfig.h"
 
 enum class HexapodStateMode : uint8_t // tatsächlicher interner Zustand von HANNAH
 {

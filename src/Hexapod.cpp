@@ -1,9 +1,16 @@
 // Hexapod.cpp
 #include "Hexapod.h"
-#include "GaitController.h"
 
 void Hexapod::updateTesting(const HexapodControl &control)
 {
+
+    GaitRequest request;
+    request.moveVecBody = control.moveDirBody;
+    request.yaw = control.yaw;
+    request.speed = 1.0f;
+    request.pitch = control.pitch;
+
+    gaitController.setGaitRequest(request);
 
     gaitController.updateSingleLegTest();
 
@@ -44,10 +51,10 @@ void Hexapod::begin()
     {
         LegCalibration calibration;
 
-        calibration.mountPosition = mountPos[i];
+        calibration.mountPosition = COXA_MOUNT_POS_BODY_MM[i];
 
         // vorläufig: lokales Home für alle Beine gleich
-        calibration.homePosition = {AF_CA, 0.0f, -80.0f};
+        calibration.homePosition = FOOT_HOME_POS_LOCAL_MM;
 
         calibration.offsets = {0.0f, 0.0f, 10.0f};
 
@@ -97,7 +104,7 @@ void Hexapod::debugRoundtripTest()
     for (uint8_t i = 0; i < LEG_COUNT; i++)
     {
         FootPositionBody body =
-            gaitController.localToBody(i, FOOT_HOME_LOCAL);
+            gaitController.localToBody(i, FOOT_HOME_POS_LOCAL_MM);
 
         LegPositionLocal local =
             transformBodyToLegLocal(i, body);
@@ -251,7 +258,7 @@ LegPositionLocal Hexapod::transformBodyToLegLocal(uint8_t legIndex, const FootPo
 
     Vector3D offsetBody = footTargetBody - mount;
 
-    float phi = mountPhi[legIndex];
+    float phi = COXA_MOUNT_ANGLE_BODY_RAD[legIndex];
     float c = cosf(-phi);
     float s = sinf(-phi);
 

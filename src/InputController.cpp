@@ -22,7 +22,7 @@ void InputController::update()
     funkSteuerung.lesen();
     interpretPacket(funkSteuerung.getFunkPacket());
 
-    // daraus dirX, dirY, rot setzen
+    // daraus dirX, dirY, yaw setzen
 }
 
 void InputController::interpretPacket(const FunkPacket &packet)
@@ -31,21 +31,24 @@ void InputController::interpretPacket(const FunkPacket &packet)
 
     if (!packet.online)
     {
-        control.dirX = 0.0f;
-        control.dirY = 0.0f;
-        control.rot = 0.0f;
+        control.moveDirBody = {0.0f, 0.0f, 0.0f};
         control.pitch = 0.0f;
+        control.yaw = 0.0f;
 
         control.moveMode = HexapodMoveMode::Idle;
         control.function = HexapodFunction::Stop;
         control.online = false;
+        control.debugMode = HexapodDebugMode::Off;
+        control.resetStatusRequested = false;
+        control.trainer = false;
+
         lastTrainer = false;
         return;
     }
 
-    control.dirX = normalizeAxis(packet.hl_lr, 30, 102);
-    control.dirY = normalizeAxis(packet.hl_ud, 34, 92);
-    control.rot = normalizeAxis(packet.hr_lr, 29, 100);
+    control.moveDirBody.x = normalizeAxis(packet.hl_lr, 30, 102);
+    control.moveDirBody.y = normalizeAxis(packet.hl_ud, 34, 92);
+    control.moveDirBody.z = normalizeAxis(packet.hr_lr, 29, 100);
     control.pitch = normalizeAxis(packet.hr_ud, 30, 103);
 
     control.debugMode = interpretDebugMode(packet.flap);
