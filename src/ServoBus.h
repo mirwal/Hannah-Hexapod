@@ -85,6 +85,8 @@ public:
 
     // Servo abfragen
     float getPresentPosition(uint8_t id, uint8_t unit = 1); // 0 = RAW, 1 = DEGREE
+    float getVoltage(uint8_t id);
+    uint8_t getTemperature(uint8_t id);
 
 private:
     uint16_t model_number;

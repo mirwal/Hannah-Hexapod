@@ -3,10 +3,20 @@
 // Control Table definitions for AX-12A (Firmware 1.0)
 #define sendData(args) (Serial1.write(args)) // Write Over Serial
 
+using namespace ControlTableItem;
+//
+constexpr uint8_t DXL_DIR_PIN = 2;
+
 void ServoBus::begin()
 {
-    dxl.begin(1000000); // Initialisiert Serial & Direction-Pin intern!
+    // pinMode(DXL_DIR_PIN, OUTPUT);
+    // digitalWrite(DXL_DIR_PIN, LOW); // TX-Treiber aus, RX aktiv
+
+    // delay(5000); // Servos und Bus nach Power-On kurz sammeln lassen
+
+    dxl.begin(1000000);
     dxl.setPortProtocolVersion(1.0);
+
     Serial.println("ServoBus bereit.");
 }
 
@@ -47,7 +57,7 @@ bool ServoBus::ping(uint8_t id)
     {
         pingSuccess = dxl.ping(id);
         delay(20); // Kurze Pause, um die Kommunikation zu stabilisieren
-    } while (!pingSuccess && (millis() - startTime < 200)); // 200ms Timeout
+    } while (!pingSuccess && (millis() - startTime < 50)); // 200ms Timeout
     return pingSuccess;
 }
 
@@ -116,4 +126,38 @@ bool ServoBus::setSpeed(uint8_t id, uint16_t speed)
         return false;
     }
     return dxl.write(id, ADDR_MOVING_SPEED_L, (uint8_t *)&speed, 2, 1);
+}
+
+float ServoBus::getVoltage(uint8_t id)
+{
+    for (uint8_t attempt = 0; attempt < 4; attempt++)
+    {
+        uint8_t rawVoltage = dxl.readControlTableItem(PRESENT_VOLTAGE, id);
+
+        if (rawVoltage > 0)
+        {
+            return rawVoltage * 0.1f;
+        }
+
+        delayMicroseconds(1000);
+    }
+
+    return 0.0f;
+}
+
+uint8_t ServoBus::getTemperature(uint8_t id)
+{
+    for (uint8_t attempt = 0; attempt < 4; attempt++)
+    {
+        uint8_t temperature = dxl.readControlTableItem(PRESENT_TEMPERATURE, id);
+
+        if (temperature > 0)
+        {
+            return temperature;
+        }
+
+        delayMicroseconds(1000);
+    }
+
+    return 0;
 }

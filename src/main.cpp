@@ -34,6 +34,8 @@ uint32_t lastPingTime = 0;
 
 void setup()
 {
+  pinMode(33, OUTPUT);
+  digitalWrite(33, LOW); // Teensy 4.1 Power LED einschalten
   Serial.begin(115200);
   tast.begin(9600);     // Funkempfänger initialisieren
   servoBus.begin();     // Dynamixel UART
@@ -42,13 +44,15 @@ void setup()
   // 5 Sekunden Timeout
   uint32_t startTime = millis();
 
-  while (!Serial && (millis() - startTime < 5000))
+  while (!Serial && (millis() - startTime < 1000))
   {
     delay(10);
   }
 
   Serial.println("Hexapod Startet...");
   delay(2000); // Servos Zeit zum Hochfahren geben
+  pinMode(33, OUTPUT);
+  digitalWrite(33, HIGH); //
 
   Serial.print(hexapod.createServoIdReport()); // Servos ausgeben
   for (uint8_t i = 1; i <= 18; i++)
