@@ -47,6 +47,7 @@ void Hexapod::updateTesting(const HexapodControl &control)
 
 void Hexapod::begin()
 {
+
     for (uint8_t i = 0; i < LEG_COUNT; i++)
     {
         LegCalibration calibration;
@@ -70,7 +71,6 @@ void Hexapod::update(const HexapodControl &control)
     {
         state = HexapodStateMode::Idle;
         systemStatus.setFlag(SystemFlag::FunkOffline);
-
         return;
     }
 
@@ -82,7 +82,6 @@ void Hexapod::update(const HexapodControl &control)
         Serial.print("SystemFlags HEX: 0x");
         Serial.println(systemStatus.getFlags(), HEX);
 
-        uint16_t deg = servoBus.getPresentPosition(1, 1); // Example call with id=1 and unit=1 (degree)
         for (uint16_t i = 0; i < 18; i++)
         {
             uint16_t deg = servoBus.getPresentPosition(i + 1, 1); // Example call with id=i+1 and unit=1 (degree)

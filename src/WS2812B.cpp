@@ -1,18 +1,17 @@
 #include "WS2812B.h"
 
-void WS2812B::begin(uint8_t pin)
-{
-    pinMode(pin, OUTPUT);
-}
+uint8_t WS2812B::drawingMemory[LED_COUNT * 3] = {};
 
-void WS2812B::setColor(int r, int g, int b)
-{
-}
+DMAMEM uint8_t WS2812B::displayMemory[LED_COUNT * 12] = {};
 
-void WS2812B::show()
+WS2812B::WS2812B()
+    : ws2812b_Leds(
+          LED_COUNT,
+          displayMemory,
+          drawingMemory,
+          LED_PIN,
+          WS2812_GRB)
+// WS2812_RGB)
 {
 }
-
-void WS2812B::clear()
-{
-}
+// WS2812Serial led_Ring;
