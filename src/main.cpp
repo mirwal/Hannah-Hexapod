@@ -39,7 +39,7 @@ void setup()
   pinMode(33, OUTPUT);
   digitalWrite(33, LOW); // Teensy 4.1 Power LED einschalten
   Serial.begin(115200);
-  tast.begin(9600); // Funkempfänger initialisieren
+  tast.begin(115200); // Funkempfänger initialisieren
 
   servoBus.begin();     // Dynamixel UART
   systemStatus.begin(); // Systemstatus initialisieren

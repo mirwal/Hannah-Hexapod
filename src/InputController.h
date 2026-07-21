@@ -28,5 +28,6 @@ private:
     bool lastTrainer = false;
     void interpretPacket(const FunkPacket &packet);
     HexapodMoveMode interpretMoveMode(const FunkPacket &packet) const;
-    float normalizeAxis(const uint8_t raw, const uint8_t rawMin, const uint8_t rawMax) const;
+    float normalizeAxis(const uint16_t raw, const uint16_t rawMin, const uint16_t rawMax, const float offset) const;
+    float normalizeRange(uint16_t raw, uint16_t rawMin, uint16_t rawMax) const;
 };

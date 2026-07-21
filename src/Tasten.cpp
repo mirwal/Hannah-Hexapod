@@ -32,7 +32,7 @@ void Tasten::begin(long baud)
 	beginCom(baud);
 }
 
-bool Tasten::lesen()
+bool Tasten::funkDatenEinlesen()
 {
 	bool packetReceived = false;
 
@@ -40,91 +40,89 @@ bool Tasten::lesen()
 	if (offline_Counter > 20)
 	{
 		setOnlineStatus(false);
-		updateFunkPacket();
 	}
 
-	if (availableData() < 50)
-		return false;
-
-	while (availableData() > 0)
+	// Wir brauchen mindestens Startbyte + zweites Startbyte
+	while (availableData() >= 2)
 	{
+		byte first = readData();
 
-		Incoming_Byte = readData();
-		if ((Incoming_Byte == 0x0A) && (readData() == 0x7E))
+		if (first != 0xF1)
 		{
-			if (availableData() < 22)
-			{
-				return packetReceived;
-			}
-			int count = 0;
-			uint8_t speicher[12];
-
-			do
-			{ // Hebel und Poti und Feader lesen
-				MSB = readData();
-				LSB = readData();
-				speicher[count] = decodiren(MSB, LSB);
-				if (speicher[count++] > 128)
-					count = 9;
-			} while ((count <= 7) && (readData() == 0xFF));
-
-			Incoming_Byte = readData();
-			if (Incoming_Byte < 128)
-				speicher[count++] = Incoming_Byte;
-
-			if (count == 8)
-			{
-				// Incoming_Byte = speicher[7];
-
-				int i = 0;
-				for (i = 0; i < count; i++)
-				{
-					setTasteWert(i, speicher[i]);
-				}
-				// Taster lesen
-				for (int j = 7; j > 0; j--)
-				{
-					if (((Incoming_Byte >> 6) % 2) == 0)
-					{
-						setTasteStatus(14 - j, false);
-					}
-					else
-					{
-						setTasteStatus(14 - j, true);
-					}
-					Incoming_Byte <<= 1;
-				}
-			}
-			Incoming_Byte = readData();
-			if (Incoming_Byte < 255)
-			{
-				speicher[count++] = Incoming_Byte;
-			}
-
-			// Taster T1 bis T8 lesen
-			if (count == 9)
-			{
-				for (int t = 8; t > 0; t--)
-				{
-					if (((Incoming_Byte >> 7) % 2) != 0)
-					{
-						setTasteStatus(29 - t, true);
-					}
-					else
-					{
-						setTasteStatus(29 - t, false);
-					}
-					Incoming_Byte <<= 1;
-				}
-			}
-			count = 0;
-			/**/
-			offline_Counter = 0;
-			setOnlineStatus(true);
-			packetReceived = true;
-			updateFunkPacket();
+			continue;
 		}
+		byte second = readData(); // read and discard the second start byte
+		if (second != 0x7E)
+		{
+			continue;
+		}
+
+		// Ab hier haben wir den Paketanfang gefunden.
+		// Es fehlen noch 18 Byte: Byte 2 bis Byte 19.
+		if (availableData() < 18)
+		{
+			// Paket ist noch nicht vollständig angekommen.
+			return false;
+		}
+
+		uint8_t packet[20] = {0};
+
+		packet[0] = 0xF1;
+		packet[1] = 0x7E;
+		for (uint8_t i = 2; i < 20; i++)
+		{
+			packet[i] = readData();
+		}
+		if (!FunkPacketIsChecksumValid(packet, 20))
+		{
+			Serial.println("Checksum Fehler");
+			return false;
+		}
+
+		// Paket ist gültig
+		// Jetzt Daten aus packet[] übernehmen
+		funkPacket.hl_ud = readU16(packet, 2);
+		funkPacket.hl_lr = readU16(packet, 4);
+		funkPacket.hr_ud = readU16(packet, 6);
+		funkPacket.hr_lr = readU16(packet, 8);
+		funkPacket.poti = readU16(packet, 10);
+		funkPacket.flap = readU16(packet, 12);
+		funkPacket.fader = readU16(packet, 14);
+
+		funkPacket.schalter = packet[16];
+		funkPacket.hl1 = isBitSet(funkPacket.schalter, 0);
+		funkPacket.hl2 = isBitSet(funkPacket.schalter, 1);
+		funkPacket.hl3 = isBitSet(funkPacket.schalter, 2);
+
+		funkPacket.hr1 = isBitSet(funkPacket.schalter, 3);
+		funkPacket.hr2 = isBitSet(funkPacket.schalter, 4);
+		funkPacket.hr3 = isBitSet(funkPacket.schalter, 5);
+
+		funkPacket.taster = packet[17];
+		funkPacket.taster1 = isBitSet(funkPacket.taster, 0);
+		funkPacket.taster2 = isBitSet(funkPacket.taster, 1);
+		funkPacket.taster3 = isBitSet(funkPacket.taster, 2);
+		funkPacket.taster4 = isBitSet(funkPacket.taster, 3);
+		funkPacket.taster5 = isBitSet(funkPacket.taster, 4);
+		funkPacket.taster6 = isBitSet(funkPacket.taster, 5);
+		funkPacket.taster7 = isBitSet(funkPacket.taster, 6);
+		funkPacket.taster8 = isBitSet(funkPacket.taster, 7);
+
+		funkPacket.sonderTasten = packet[18];
+		funkPacket.sonderTaste1 = isBitSet(funkPacket.sonderTasten, 0);
+		funkPacket.sonderTaste2 = isBitSet(funkPacket.sonderTasten, 1);
+		funkPacket.sonderTaste3 = isBitSet(funkPacket.sonderTasten, 2);
+		funkPacket.sonderTaste4 = isBitSet(funkPacket.sonderTasten, 3);
+		funkPacket.sonderTaste5 = isBitSet(funkPacket.sonderTasten, 4);
+		funkPacket.sonderTaste6 = isBitSet(funkPacket.sonderTasten, 5);
+		funkPacket.sonderTaste7 = isBitSet(funkPacket.sonderTasten, 6);
+		funkPacket.sonderTaste8 = isBitSet(funkPacket.sonderTasten, 7);
+
+		offline_Counter = 0;
+		setOnlineStatus(true);
+		packetReceived = true;
 	}
+
 	return packetReceived;
 }
 
@@ -133,34 +131,6 @@ const FunkPacket &Tasten::getFunkPacket() const
 	return funkPacket;
 }
 
-bool Tasten::setTasteWert(unsigned char ID, uint8_t wert)
-{
-	if (wert > 128)
-		return false;
-	TasteWert[ID] = wert;
-	PotiWert[ID] = wert;
-	return true;
-	// sendDebug(wert);sendDebug("\t");
-}
-uint8_t Tasten::getTasteWert(unsigned char ID)
-{
-	if (TasteWert[ID] < 255)
-		return TasteWert[ID];
-	return TasteWert[ID];
-}
-int Tasten::getTasteWert(unsigned char ID, bool t)
-{
-	if (PotiWert[ID] < 255)
-		return PotiWert[ID];
-	return PotiWert[ID];
-}
-
-bool Tasten::getTasteStatus(unsigned char ID)
-{
-	if (TasteStatus[ID])
-		return true;
-	return false;
-}
 bool Tasten::sendBefehl(unsigned char befehl)
 {
 	if (ist_befehl == befehl)
@@ -189,58 +159,34 @@ bool Tasten::sendBefehl(unsigned char befehl)
 	}
 	return true;
 }
-float Tasten::getAxisNorm(uint8_t id, uint8_t rawMin, uint8_t rawMax)
-{
-
-	int raw = getTasteWert(id); // 0…255
-	// Verschiebe und skaliere: Mitte → 0.0, Rand → ±1.0
-	float mid = (rawMin + rawMax) * 0.5f;
-	float halfR = (rawMax - rawMin) * 0.5f;
-	float norm = (raw - mid) / halfR;
-	// Sicherstellen, dass wir nicht out-of-bounds rauslaufen:
-	if (norm > 1.0f)
-		norm = 1.0f;
-	else if (norm < -1.0f)
-		norm = -1.0f;
-
-	return norm;
-}
 
 void Tasten::setOnlineStatus(bool state)
 {
 	online = state;
 }
-void Tasten::updateFunkPacket()
+uint8_t Tasten::calculateChecksum(const uint8_t *data, size_t length)
 {
-	funkPacket.hl_ud = getTasteWert(HL_UD);
-	funkPacket.hl_lr = getTasteWert(HL_LR);
+	uint8_t checksum = 0;
 
-	funkPacket.hr_ud = getTasteWert(HR_UD);
-	funkPacket.hr_lr = getTasteWert(HR_LR);
+	for (size_t i = 0; i < length; i++)
+	{
+		checksum ^= data[i];
+	}
 
-	funkPacket.poti = getTasteWert(POTI);
-	funkPacket.fader = getTasteWert(FADER);
-	funkPacket.flap = getTasteWert(FLAP);
+	return checksum;
+}
 
-	funkPacket.hr1 = getTasteStatus(HR1);
-	funkPacket.hr2 = getTasteStatus(HR2);
-	funkPacket.hr3 = getTasteStatus(HR3);
+bool Tasten::FunkPacketIsChecksumValid(const uint8_t *data, size_t length)
+{
+	if (length < 1)
+	{
+		return false; // Not enough data to validate checksum
+	}
 
-	funkPacket.hl1 = getTasteStatus(HL1);
-	funkPacket.hl2 = getTasteStatus(HL2);
-	funkPacket.hl3 = getTasteStatus(HL3);
+	uint8_t receivedChecksum = data[length - 1];
+	uint8_t calculatedChecksum = calculateChecksum(data, length - 1);
 
-	funkPacket.trainer = getTasteStatus(TRAINER);
-
-	funkPacket.t1 = getTasteStatus(T1);
-	funkPacket.t2 = getTasteStatus(T2);
-	funkPacket.t3 = getTasteStatus(T3);
-	funkPacket.t4 = getTasteStatus(T4);
-	funkPacket.t5 = getTasteStatus(T5);
-	funkPacket.t6 = getTasteStatus(T6);
-	funkPacket.t7 = getTasteStatus(T7);
-	funkPacket.t8 = getTasteStatus(T8);
-	funkPacket.online = getOnlineStatus();
+	return receivedChecksum == calculatedChecksum;
 }
 
 bool Tasten::getOnlineStatus()
@@ -248,15 +194,6 @@ bool Tasten::getOnlineStatus()
 	return online;
 }
 
-bool Tasten::setTasteStatus(unsigned char ID, bool status)
-{
-	if (TasteStatus[ID] == status)
-		return false;
-
-	TasteStatus[ID] = status;
-	return true;
-}
-
-Tasten Tast;
+// Tasten Tast;
 
 // 1011000

@@ -39,6 +39,8 @@ struct HexapodControl
     MoveVectorBody moveDirBody = {0.0f, 0.0f, 0.0f}; // x/y Bewegungsrichtung im Body-System
     float yaw = 0.0f;                                // Drehwunsch um die Z-Achse
     float pitch = 0.0f;
+    float poti = 0.0f;  // Poti-Wert, normiert auf [0.0, 1.0]
+    float fader = 0.0f; // Fader-Wert, normiert auf [0.0, 1.0]
     bool trainer = false;
     bool resetStatusRequested = false;
 
