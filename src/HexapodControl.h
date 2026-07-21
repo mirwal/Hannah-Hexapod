@@ -41,7 +41,27 @@ struct HexapodControl
     float pitch = 0.0f;
     float poti = 0.0f;  // Poti-Wert, normiert auf [0.0, 1.0]
     float fader = 0.0f; // Fader-Wert, normiert auf [0.0, 1.0]
+
+    // Taster
+    bool taster1 = false;
+    bool taster2 = false;
+    bool taster3 = false;
+    bool taster4 = false;
+    bool taster5 = false;
+    bool taster6 = false;
+    bool taster7 = false;
+    bool taster8 = false;
+
+    // Taster / Sonderfunktionen
     bool trainer = false;
+    bool clearTaster = false;
+    bool backTaster = false;
+    bool encoderTaster = false;
+    bool sonderTaste5 = false;
+    bool sonderTaste6 = false;
+    bool sonderTaste7 = false;
+    bool sonderTaste8 = false;
+
     bool resetStatusRequested = false;
 
     HexapodDebugMode debugMode = HexapodDebugMode::Off;

@@ -9,6 +9,10 @@
  * Beispiel: LegPosition ist technisch ein Vector3D, beschreibt im Kontext
  * von HANNAH aber eine Position, die zu einem Bein gehört.
  */
+
+#define sendDebug(args) (Serial.print(args))
+#define sendDebugln(args) (Serial.println(args))
+
 #include "Vector3D.h"
 using LegPositionLocal = Vector3D;  // Fußziel relativ zum Coxa-Montagepunkt
 using FootPositionBody = Vector3D;  // Fußposition im Body-Koordinatensystem

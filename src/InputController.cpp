@@ -1,5 +1,6 @@
 // InputController.cpp
 #include "InputController.h"
+#include "HexapodTypes.h"
 #include "Arduino.h"
 #include "Tasten.h"
 
@@ -11,7 +12,6 @@ void InputController::update()
 
     // Einmal-Befehl immer sofort zurücksetzen
     control.resetStatusRequested = false;
-
     if (now - lastReadTime < 50)
     {
         return; // nur alle 50 ms lesen
@@ -20,15 +20,14 @@ void InputController::update()
     lastReadTime = now;
 
     funkSteuerung.funkDatenEinlesen();
-    interpretPacket(funkSteuerung.getFunkPacket());
 
+    interpretPacket(funkSteuerung.getFunkPacket());
     // daraus dirX, dirY, yaw setzen
 }
 
 void InputController::interpretPacket(const FunkPacket &packet)
 {
     control.online = packet.online;
-
     if (!packet.online)
     {
         control.moveDirBody = {0.0f, 0.0f, 0.0f};
@@ -54,19 +53,36 @@ void InputController::interpretPacket(const FunkPacket &packet)
     control.fader = normalizeRange(packet.fader, 1023, 0);
     control.debugMode = interpretDebugMode(packet.flap);
     control.moveMode = interpretMoveMode(packet);
-    // Serial.print("Flap: ");
-    // Serial.println(static_cast<int>(control.debugMode));
+    control.trainer = packet.trainer;
+    control.clearTaster = packet.clearTaster;
+    control.backTaster = packet.backTaster;
+    control.encoderTaster = !packet.encoderTaster;
+    control.sonderTaste5 = packet.sonderTaste5;
+    control.sonderTaste6 = packet.sonderTaste6;
+    control.sonderTaste7 = packet.sonderTaste7;
+    control.sonderTaste8 = packet.sonderTaste8;
+    control.taster1 = packet.taster3;
+    control.taster2 = packet.taster4;
+    control.taster3 = packet.taster5;
+    control.taster4 = packet.taster6;
+    control.taster5 = packet.taster7;
+    control.taster6 = packet.taster8;
+    control.taster7 = packet.taster1;
+    control.taster8 = packet.taster2;
+
+    control.moveMode = interpretMoveMode(packet);
 
     // Flankenerkennung:
     // true nur in dem Moment, wo der Taster neu gedrückt wurde
     control.resetStatusRequested = packet.trainer && !lastTrainer;
-    control.trainer = packet.trainer;
     // Hier wird der aktuelle Zustand für den nächsten Durchlauf gemerkt
+    lastTrainer = control.trainer;
 }
+
 HexapodMoveMode InputController::interpretMoveMode(const FunkPacket &packet) const
 {
     uint8_t modeMask = 0;
-
+    // TODO: Hier könnte man die Logik anpassen, um verschiedene Kombinationen von Tasten zu interpretieren.
     if (packet.hl1)
         modeMask |= 0b001;
     if (packet.hl2)

@@ -6,9 +6,6 @@
 #include "InputController.h"
 #include "SystemStatus.h"
 
-#define sendDebug(args) (Serial.print(args))
-#define sendDebugln(args) (Serial.println(args))
-
 ServoBus servoBus;
 Tasten tast;
 InputController inputController(tast);

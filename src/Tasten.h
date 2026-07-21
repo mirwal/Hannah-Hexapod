@@ -1,34 +1,23 @@
 // Tasten.h
 #pragma once
-#include <Arduino.h>
-#include <cstdint>
 /// Schnittstelle zur Funksteuerung: liest die seriell empfangenen Steuerdaten ein,
 /// dekodiert Kanäle, Taster und Schalter und stellt sie dem restlichen Programm
 /// als Rohwerte, normierte Achsenwerte und Statusinformationen zur Verfügung.
+#include <Arduino.h>
+#include <cstdint>
+#include "HexapodTypes.h"
+// Macro for the selection of the Serial Port
 
-// #define HL_UD 0
-// #define HL_LR 1
-// #define HR_UD 2
-// #define HR_LR 3
-// #define POTI 4
-// #define FADER 5
-// #define FLAP 6
-// #define HR1 7
-// #define HR2 8
-// #define HR3 9
-// #define HL1 10
-// #define HL2 11
-// #define HL3 12
-// #define TRAINER 13
+#define sendData(args) (Serial7.write(args))  // Write Over Serial
+#define availableData() (Serial7.available()) // Check Serial Data Available
+#define readData() (Serial7.read())			  // Read Serial Data
+#define peekData() (Serial7.peek())			  // Peek Serial Data
+#define beginCom(args) (Serial7.begin(args))  // Begin Serial Comunication
+#define endCom() (Serial7.end())			  // End Serial Comunication
+// Macro for Timing
 
-// #define T1 21
-// #define T2 22
-// #define T3 23
-// #define T4 24
-// #define T5 25
-// #define T6 26
-// #define T7 27
-// #define T8 28
+#define delayus(args) (delayMicroseconds(args)) // Delay Microseconds
+
 struct FunkPacket
 {
 	// Analogwerte 0–1023
@@ -120,7 +109,7 @@ private:
 	{
 		return (value & (1 << bit)) != 0;
 	}
-	bool online = false;
+	///! bool online = false; MMMMMMMMMMMMMMMÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
 	void setOnlineStatus(bool state);
 	FunkPacket funkPacket;
 	bool FunkPacketIsChecksumValid(const uint8_t *data, size_t length);

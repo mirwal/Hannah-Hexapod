@@ -1,24 +1,5 @@
 // Tasten.cpp
-#if defined(ARDUINO) && ARDUINO >= 100 // Arduino IDE Version
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
 #include "Tasten.h"
-
-// Macro for the selection of the Serial Port
-
-#define sendData(args) (Serial7.write(args))  // Write Over Serial
-#define availableData() (Serial7.available()) // Check Serial Data Available
-#define readData() (Serial7.read())			  // Read Serial Data
-#define peekData() (Serial7.peek())			  // Peek Serial Data
-#define beginCom(args) (Serial7.begin(args))  // Begin Serial Comunication
-#define endCom() (Serial7.end())			  // End Serial Comunication
-#define sendDebug(args) (Serial.print(args))
-#define sendDebugln(args) (Serial.println(args))
-// Macro for Timing
-
-#define delayus(args) (delayMicroseconds(args)) // Delay Microseconds
 
 Tasten::Tasten()
 {
@@ -75,7 +56,6 @@ bool Tasten::funkDatenEinlesen()
 		}
 		if (!FunkPacketIsChecksumValid(packet, 20))
 		{
-			Serial.println("Checksum Fehler");
 			return false;
 		}
 
@@ -109,20 +89,19 @@ bool Tasten::funkDatenEinlesen()
 		funkPacket.taster8 = isBitSet(funkPacket.taster, 7);
 
 		funkPacket.sonderTasten = packet[18];
-		funkPacket.sonderTaste1 = isBitSet(funkPacket.sonderTasten, 0);
-		funkPacket.sonderTaste2 = isBitSet(funkPacket.sonderTasten, 1);
-		funkPacket.sonderTaste3 = isBitSet(funkPacket.sonderTasten, 2);
-		funkPacket.sonderTaste4 = isBitSet(funkPacket.sonderTasten, 3);
+		funkPacket.trainer = isBitSet(funkPacket.sonderTasten, 0);
+		funkPacket.clearTaster = isBitSet(funkPacket.sonderTasten, 1);
+		funkPacket.backTaster = isBitSet(funkPacket.sonderTasten, 2);
+		funkPacket.encoderTaster = isBitSet(funkPacket.sonderTasten, 3);
 		funkPacket.sonderTaste5 = isBitSet(funkPacket.sonderTasten, 4);
 		funkPacket.sonderTaste6 = isBitSet(funkPacket.sonderTasten, 5);
 		funkPacket.sonderTaste7 = isBitSet(funkPacket.sonderTasten, 6);
 		funkPacket.sonderTaste8 = isBitSet(funkPacket.sonderTasten, 7);
 
 		offline_Counter = 0;
-		setOnlineStatus(true);
+		funkPacket.online = true;
 		packetReceived = true;
 	}
-
 	return packetReceived;
 }
 
@@ -162,7 +141,7 @@ bool Tasten::sendBefehl(unsigned char befehl)
 
 void Tasten::setOnlineStatus(bool state)
 {
-	online = state;
+	funkPacket.online = state;
 }
 uint8_t Tasten::calculateChecksum(const uint8_t *data, size_t length)
 {
@@ -191,7 +170,7 @@ bool Tasten::FunkPacketIsChecksumValid(const uint8_t *data, size_t length)
 
 bool Tasten::getOnlineStatus()
 {
-	return online;
+	return funkPacket.online;
 }
 
 // Tasten Tast;

@@ -15,7 +15,6 @@ class InputController
 {
 public:
     InputController(Tasten &tast);
-
     void update();
     const HexapodControl &getControl() const { return control; }
     HexapodDebugMode interpretDebugMode(uint8_t flap) const;
